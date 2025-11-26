@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#667eea">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Paper Weight Calculator</title>
+    <style>
+        /* General Styles */
+        * {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            box-sizing: border-box;
+        }
+        
+        html {
+            font-size: 16px;
+            -webkit-text-size-adjust: 100%;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            overflow-x: hidden;
+        }
+
+        /* Card Container */
+        .card {
+            background-color: white;
+            width: 100%;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: max(20px, env(safe-area-inset-top)) 20px 20px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .header h1 { 
+            margin: 0; 
+            font-size: clamp(20px, 5vw, 24px); 
+            font-weight: bold; 
+        }
+        .header p { 
+            margin: 6px 0 0; 
+            color: rgba(255, 255, 255, 0.95); 
+            font-size: clamp(12px, 3vw, 13px); 
+        }
+
+        /* Content Area */
+        .content { 
+            padding: 20px; 
+            padding-bottom: max(30px, env(safe-area-inset-bottom));
+            flex: 1;
+        }
+        
+        /* Form Elements */
+        .form-group { margin-bottom: 20px; }
+        label { 
+            display: block; 
+            font-size: clamp(14px, 3.5vw, 15px); 
+            font-weight: 600; 
+            color: #374151; 
+            margin-bottom: 8px; 
+        }
+        
+        input[type="number"] {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: max(16px, 1rem);
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+        }
+
+        /* Unit Toggle */
+        .toggle-container {
+            display: flex;
+            gap: 10px;
+        }
+        .toggle-option {
+            flex: 1;
+            text-align: center;
+            padding: 12px 8px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #6b7280;
+            transition: all 0.2s ease;
+            font-size: clamp(14px, 3.5vw, 16px);
+        }
+        .toggle-option:active {
+            transform: scale(0.98);
+        }
+        input[type="radio"] { display: none; }
+        input[type="radio"]:checked + .toggle-option {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        /* Grid for Width/Height */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        /* Quick Buttons */
+        .btn-group { 
+            display: flex; 
+            gap: 8px; 
+            margin-top: 10px; 
+            flex-wrap: wrap; 
+        }
+        .btn-small {
+            font-size: clamp(12px, 3vw, 14px);
+            padding: 10px 12px;
+            background-color: #f3f4f6;
+            border: 2px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            flex: 1;
+            min-width: 70px;
+            white-space: nowrap;
+        }
+        .btn-small:active { 
+            transform: scale(0.96);
+        }
+        .btn-active { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+            border-color: #667eea;
+        }
+
+        /* Results Box */
+        .result-box {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 2px solid #bae6fd;
+            border-radius: 16px;
+            padding: 18px;
+            margin-top: 20px;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+        }
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            padding-bottom: 14px;
+            border-bottom: 2px solid #dbeafe;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .result-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        
+        .big-text { 
+            font-size: clamp(32px, 10vw, 42px); 
+            font-weight: 800; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+        .unit-text { 
+            font-size: clamp(18px, 5vw, 22px); 
+            font-weight: bold; 
+            color: #667eea;
+            margin-left: 4px; 
+        }
+        
+        .result-label {
+            color: #0369a1; 
+            font-weight: 600;
+            font-size: clamp(13px, 3.5vw, 15px);
+        }
+        
+        .result-value {
+            font-size: clamp(16px, 4.5vw, 20px);
+            font-weight: bold;
+            color: #0c4a6e;
+        }
+
+        /* Reset Button */
+        .reset-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            border: none;
+            color: white;
+            padding: 14px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            font-size: clamp(14px, 3.5vw, 16px);
+            font-weight: 600;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+        .reset-btn:active { 
+            transform: scale(0.98);
+        }
+
+        /* Responsive breakpoints */
+        @media (max-width: 360px) {
+            .content { padding: 16px; }
+            .form-group { margin-bottom: 16px; }
+            .grid-2 { gap: 10px; }
+            .btn-group { gap: 6px; }
+        }
+        
+        @media (min-width: 600px) {
+            .card {
+                max-width: 480px;
+                margin: 0 auto;
+                border-radius: 20px;
+                min-height: auto;
+            }
+            body {
+                padding: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+
+        /* Safe area for notched phones */
+        @supports (padding: max(0px)) {
+            .content {
+                padding-left: max(20px, env(safe-area-inset-left));
+                padding-right: max(20px, env(safe-area-inset-right));
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div class="header">
+            <h1>📄 Paper Weight Calculator</h1>
+            <p>Fast & Accurate</p>
+        </div>
+
+        <div class="content">
+            
+            <!-- Unit Selection -->
+            <div class="form-group">
+                <label>📏 Unit Select Karein:</label>
+                <div class="toggle-container">
+                    <label style="flex:1;">
+                        <input type="radio" name="unit" value="inch" checked onchange="calculateWeight()">
+                        <div class="toggle-option">Inches</div>
+                    </label>
+                    <label style="flex:1;">
+                        <input type="radio" name="unit" value="cm" onchange="calculateWeight()">
+                        <div class="toggle-option">CM</div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Dimensions -->
+            <div class="grid-2 form-group">
+                <div>
+                    <label>↔️ Width (Chaudai)</label>
+                    <input type="number" id="width" placeholder="22" oninput="calculateWeight()">
+                </div>
+                <div>
+                    <label>↕️ Height (Lambai)</label>
+                    <input type="number" id="height" placeholder="28" oninput="calculateWeight()">
+                </div>
+            </div>
+
+            <!-- GSM -->
+            <div class="form-group">
+                <label>⚖️ Paper GSM</label>
+                <input type="number" id="gsm" placeholder="180" oninput="calculateWeight()">
+            </div>
+
+            <!-- Sheets Quantity -->
+            <div class="form-group">
+                <label>📋 Total Sheets</label>
+                <input type="number" id="sheets" value="144" oninput="calculateWeight()">
+                <div class="btn-group">
+                    <button onclick="setSheets(100)" class="btn-small">100</button>
+                    <button onclick="setSheets(144)" class="btn-small btn-active">144 (Gross)</button>
+                    <button onclick="setSheets(500)" class="btn-small">500 (Ream)</button>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div class="result-box">
+                <div class="result-row">
+                    <span class="result-label">📄 1 Sheet Weight:</span>
+                    <span class="result-value" id="singleSheetResult">- g</span>
+                </div>
+                
+                <div>
+                    <span class="result-label" style="display:block; margin-bottom:8px;">📦 Total Weight:</span>
+                    <div style="display:flex; align-items:baseline;">
+                        <span class="big-text" id="totalWeightResult">-</span>
+                        <span class="unit-text">Kg</span>
+                    </div>
+                    <p style="font-size: clamp(11px, 3vw, 13px); color:#0369a1; margin: 6px 0 0 0; font-weight:500;" id="calculationDetails"></p>
+                </div>
+            </div>
+
+            <button onclick="clearForm()" class="reset-btn">🔄 Reset / Clear</button>
+        </div>
+    </div>
+
+    <script>
+        function setSheets(num) {
+            document.getElementById('sheets').value = num;
+            
+            // Update button active state
+            const buttons = document.querySelectorAll('.btn-small');
+            buttons.forEach(btn => btn.classList.remove('btn-active'));
+            event.target.classList.add('btn-active');
+            
+            calculateWeight();
+        }
+
+        function clearForm() {
+            document.getElementById('width').value = '';
+            document.getElementById('height').value = '';
+            document.getElementById('gsm').value = '';
+            document.getElementById('sheets').value = '144';
+            
+            // Reset to 144 button active
+            const buttons = document.querySelectorAll('.btn-small');
+            buttons.forEach(btn => btn.classList.remove('btn-active'));
+            buttons[1].classList.add('btn-active');
+            
+            calculateWeight();
+        }
+
+        function calculateWeight() {
+            const width = parseFloat(document.getElementById('width').value);
+            const height = parseFloat(document.getElementById('height').value);
+            const gsm = parseFloat(document.getElementById('gsm').value);
+            const sheets = parseFloat(document.getElementById('sheets').value);
+            
+            const unit = document.querySelector('input[name="unit"]:checked').value;
+            
+            const singleResultEl = document.getElementById('singleSheetResult');
+            const totalResultEl = document.getElementById('totalWeightResult');
+            const detailsEl = document.getElementById('calculationDetails');
+
+            if (!width || !height || !gsm || !sheets) {
+                singleResultEl.textContent = "- g";
+                totalResultEl.textContent = "-";
+                detailsEl.textContent = "";
+                return;
+            }
+
+            let areaInMeters = 0;
+
+            if (unit === 'inch') {
+                areaInMeters = (width * 0.0254) * (height * 0.0254);
+            } else {
+                areaInMeters = (width / 100) * (height / 100);
+            }
+
+            const weightPerSheetGrams = areaInMeters * gsm;
+            const totalWeightGrams = weightPerSheetGrams * sheets;
+            const totalWeightKg = totalWeightGrams / 1000;
+
+            // Round up if decimal >= 0.5
+            const roundedKg = Math.round(totalWeightKg);
+
+            // Display results
+            singleResultEl.textContent = weightPerSheetGrams.toFixed(2) + " g";
+            totalResultEl.textContent = roundedKg;
+            
+            detailsEl.textContent = `${sheets} sheets × ${weightPerSheetGrams.toFixed(1)}g = ${totalWeightGrams.toFixed(0)}g`;
+        }
+
+        // Calculate on page load if default values are present
+        window.addEventListener('load', calculateWeight);
+    </script>
+</body>
+</html>
